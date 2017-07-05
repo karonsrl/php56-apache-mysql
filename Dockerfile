@@ -1,5 +1,5 @@
 FROM php:5.6-apache
-MAINTAINER Florian Bender <fb+dockerhub@quantumedia.de>
+MAINTAINER Riccardo Manuelli
 
 # Install gd, iconv, mbstring, mcrypt, mysql, soap, sockets, zip, and zlib extensions
 # see example at https://hub.docker.com/_/php/
@@ -51,5 +51,6 @@ ENV UPSTREAM_NAME web-site
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["mysqld"]
 
 #EOF
