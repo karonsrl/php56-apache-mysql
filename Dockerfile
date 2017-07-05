@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
         libxml2-dev \
         zlib1g-dev \
         groupadd -r mysql && useradd -r -g mysql mysql \
-        pwgen \  # for MYSQL_RANDOM_ROOT_PASSWORD
+        pwgen \
     && docker-php-ext-install iconv mbstring mcrypt soap sockets zip \
     && docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
