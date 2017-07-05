@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
         libpng12-dev \
         libxml2-dev \
         zlib1g-dev \
-        groupadd -r mysql && useradd -r -g mysql mysql \
+        groupadd mysql && useradd -g mysql mysql \
         pwgen \
     && docker-php-ext-install iconv mbstring mcrypt soap sockets zip \
     && docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
@@ -59,7 +59,7 @@ RUN { \
 		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
 		echo mysql-community-server mysql-community-server/remove-test-db select false; \
 	} | debconf-set-selections \
-	&& apt-get update && apt-get install -y mysql-server=8.0 && rm -rf /var/lib/apt/lists/* \
+	&& apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
 	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
 # ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
