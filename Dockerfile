@@ -12,11 +12,14 @@ RUN apt-get update && apt-get install -y \
         libpng12-dev \
         libxml2-dev \
         zlib1g-dev \
+        groupadd -r mysql && useradd -r -g mysql mysql \
+        pwgen \  # for MYSQL_RANDOM_ROOT_PASSWORD
     && docker-php-ext-install iconv mbstring mcrypt soap sockets zip \
     && docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
     && docker-php-ext-configure mysql --with-mysql=mysqlnd \
-    && docker-php-ext-install mysql
+    && docker-php-ext-install mysql 
+   
 
 # Add a PHP config file. The file was copied from a php53 dotdeb package and
 # lightly modified (mostly for improving debugging). This may not be the best
@@ -51,6 +54,24 @@ ENV UPSTREAM_NAME web-site
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["mysqld"]
 
 #EOF
+
+# the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
+# also, we set debconf keys to make APT a little quieter
+RUN { \
+		echo mysql-community-server mysql-community-server/data-dir select ''; \
+		echo mysql-community-server mysql-community-server/root-pass password ''; \
+		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
+		echo mysql-community-server mysql-community-server/remove-test-db select false; \
+	} | debconf-set-selections \
+	&& apt-get update && apt-get install -y mysql-server="${MYSQL_VERSION}" && rm -rf /var/lib/apt/lists/* \
+	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
+	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
+# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
+	&& chmod 777 /var/run/mysqld
+
+VOLUME /var/lib/mysql
+
+EXPOSE 3306
+CMD ["mysqld"]
