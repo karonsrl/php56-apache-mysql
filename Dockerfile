@@ -1,6 +1,9 @@
 FROM php:5.6-apache
 MAINTAINER Riccardo Manuelli
 
+# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd mysql && useradd mysql -g mysql 
+
 # Install gd, iconv, mbstring, mcrypt, mysql, soap, sockets, zip, and zlib extensions
 # see example at https://hub.docker.com/_/php/
 RUN apt-get update && apt-get install -y \
@@ -12,7 +15,6 @@ RUN apt-get update && apt-get install -y \
         libpng12-dev \
         libxml2-dev \
         zlib1g-dev \
-        groupadd mysql && useradd -g mysql mysql \
         pwgen \
     && docker-php-ext-install iconv mbstring mcrypt soap sockets zip \
     && docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
